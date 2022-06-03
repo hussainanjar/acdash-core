@@ -1,0 +1,42 @@
+/downloads
+/log
+/screenshots
+
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+node_modules/
+dist/
+.vscode/
+log/
+cypress/screenshots
+cypress/videos
+# dotenv environment variables file
+.env
+.env-bbk
+.env-prod
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+
+# Ignore all the yarn.lock files except the one at root
+yarn.lock
+!/yarn.lock
+
+package.lock
+
+.idea
+/.idea/
+dist
+/sdk/src
+
+#.env.*
+/sdk/
+
+/coverage/
+src/config/db/config.js

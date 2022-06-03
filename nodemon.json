@@ -1,0 +1,6 @@
+{
+    "watch": ["src"],
+    "ext": "ts,json",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "tsc --skipLibCheck && node ./dist/config/server/index.js"
+}
