@@ -12,7 +12,7 @@ export interface IConfig {
   isTesting?: boolean;
   isProduction?: boolean;
   isDevelopment?: boolean;
-  mssql: {
+  mysql: {
     username?: string;
     password?: string;
     database?: string;
@@ -34,13 +34,13 @@ export const development: any = (): IConfig => {
     name: process.env.APP_NAME || 'ac_transit_api',
     port: parseInt(process.env.PORT || '3000') || 0,
     httpTimeout: parseInt(process.env.HTTP_CLIENT_TIMEOUT) || 10000,
-    mssql: {
+    mysql: {
       username: process.env.DBUSERNAME,
       password: process.env.DBPASSWORD,
       database: process.env.DATABASE,
       host: process.env.DBHOST,
       port: parseInt(process.env.DBPORT || '3306') || 0,
-      dialect: 'mssql',
+      dialect: 'mysql',
     },
     encryptionKey: process.env.ENCRYPTION_KEY,
   };
@@ -55,7 +55,7 @@ export const test: any = (): IConfig => {
     name: process.env.APP_NAME || 'ac_transit_api',
     port: parseInt(process.env.PORT || '3000') || 0,
     httpTimeout: parseInt(process.env.HTTP_CLIENT_TIMEOUT) || 10000,
-    mssql: {
+    mysql: {
       username: process.env.DBUSERNAME,
       password: process.env.DBPASSWORD,
       database: process.env.DATABASE,
@@ -76,7 +76,7 @@ export const production: any = (): IConfig => {
     name: process.env.APP_NAME || 'ac_transit_api',
     port: parseInt(process.env.PORT || '3000') || 0,
     httpTimeout: parseInt(process.env.HTTP_CLIENT_TIMEOUT) || 10000,
-    mssql: {
+    mysql: {
       username: process.env.DBUSERNAME,
       password: process.env.DBPASSWORD,
       database: process.env.DATABASE,

@@ -39,8 +39,19 @@ module.exports = {
       },
     });
 
-    await queryInterface.sequelize.query(
-      "INSERT INTO job_scheduler ([name], [run_pattern], [is_processing], [is_active], [created_at], [updated_at]) VALUES ('JOB_SCHEDULER', '*/60 * * * * *', 0, 1, '2021-11-19 21:03:57', '2021-11-19 21:03:58');",
+    await queryInterface.bulkInsert(
+      'job_scheduler',
+      [
+        {
+          name: 'JOB_SCHEDULER',
+          run_pattern: '*/60 * * * * *',
+          is_processing: false,
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ],
+      {},
     );
   },
 
