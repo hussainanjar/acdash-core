@@ -8,6 +8,7 @@ import * as queryString from 'query-string';
 import { abnormalCaseDataModifier } from '../../utils/modifier';
 import { AbnormalCasesModel, AbnormalCases } from '../../models/abnormal-threats/abnormal-cases';
 import { EnvType } from '../../utils/enum';
+import { EmailService } from '../../utils/email';
 
 async function getAbnormalCaseData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
@@ -16,6 +17,8 @@ async function getAbnormalCaseData(): Promise<void> {
 
   jobLogger.info(`getAbnormalCaseData - Execute - ${processingDate}`);
 
+  // create email service instance
+  const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
     const appStorageData: EnvReturnType = await getAppEnv([EnvType.SWITCH_WEEKLY_TO_DAILY_TIME_SLOT, EnvType.SWITCH_WEEKLY_TO_MONTHLY_TIME_SLOT]);
@@ -57,6 +60,20 @@ async function getAbnormalCaseData(): Promise<void> {
     log.response = errorMsg;
     log.isSuccess = false;
     jobLogger.error(errorMsg);
+
+    await emailService.sendEmail({
+      template: 'job-error',
+      subject: 'Error - Abnormal Cases',
+      nameFrom: process.env.EMAIL_SENDER_NAME,
+      from: process.env.EMAIL_SENDER_ADDRESS,
+      to: process.env.EMAIL_RECEIVER_ADDRESS,
+      emailDetail: {
+        processingDate,
+        errorCode: error.status || error.code,
+        errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
+        method: 'getAbnormalCaseData',
+      },
+    });
   } finally {
     jobLogger.info(`getAbnormalCaseData - Execute Final Block - ${processingDate}`);
     log.serviceType = serviceType;

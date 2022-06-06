@@ -22,17 +22,6 @@ export class EmailService {
         rejectUnauthorized: false,
       },
     });
-    this.errorTransporter = nodemailer.createTransport({
-      secure: Number(process.env.SMTP_PORT) == 465 ? true : false, // true for 465, false for other ports
-      auth: {
-        user: process.env.ERROR_EMAIL_SMTP_USERNAME,
-        pass: process.env.ERROR_EMAIL_SMTP_PASSWORD,
-      },
-      host: process.env.ERROR_EMAIL_SMTP_HOST,
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
     this._email = new Email({
       views: { root: './src/templates', options: { extension: 'twig' } },
       message: {
@@ -40,16 +29,6 @@ export class EmailService {
       },
       i18n: {},
       transport: this.transporter,
-      preview: false,
-      send: true,
-    });
-    this._errorEmail = new Email({
-      views: { root: './src/templates', options: { extension: 'twig' } },
-      message: {
-        from: process.env.ERROR_EMAIL_FROM,
-      },
-      i18n: {},
-      transport: this.errorTransporter,
       preview: false,
       send: true,
     });

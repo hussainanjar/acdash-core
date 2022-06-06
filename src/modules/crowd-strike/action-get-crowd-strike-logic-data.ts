@@ -6,6 +6,8 @@ import _ from 'lodash';
 import { CrowdStrikeModel, CrowdStrike } from '../../models/crowd-strike/crowd-strike';
 import { CronLogModel } from '../../models/cron-log/cron-log';
 import { createLogService } from '../../utils/dal';
+import { EmailService } from '../../utils/email';
+import { CrowdStrikeResponseEnum } from '../../utils/enum';
 
 async function getCrowdStrikeData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
@@ -13,6 +15,8 @@ async function getCrowdStrikeData(): Promise<void> {
   const processingDate: Date = dayjs().toDate();
   jobLogger.info(`getCrowdStrikeData - Execute - ${processingDate}`);
 
+  // create email service instance
+  const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
     const token: string = await getCrowdLogicToken();
@@ -27,11 +31,11 @@ async function getCrowdStrikeData(): Promise<void> {
       httpCall.get({ url: process.env.CS_DETECT_ENDPOINT, headers }),
     ]);
 
-    const response: string = JSON.stringify({
+    const response: any = {
       systemResponse: systemResponse.status === 'rejected' ? systemResponse.reason.message : 'success',
       incidentResponse: incidentResponse.status === 'rejected' ? incidentResponse.reason.message : 'success',
       detectResponse: detectResponse.status === 'rejected' ? detectResponse.reason.message : 'success',
-    });
+    };
 
     const payload: CrowdStrikeModel = {
       processingDate,
@@ -42,7 +46,44 @@ async function getCrowdStrikeData(): Promise<void> {
 
     await CrowdStrike.create(payload);
 
-    log.response = response;
+    for (const key of response) {
+      let currResponse: any = null;
+      let currSubject: string = '';
+      if (response[key] === 'rejected') {
+        switch (key) {
+          case CrowdStrikeResponseEnum.SYSTEM_RESPONSE:
+            currSubject = 'Error - Crowd Strike - System';
+            currResponse = systemResponse;
+            break;
+
+          case CrowdStrikeResponseEnum.INCIDENT_RESPONSE:
+            currSubject = 'Error - Crowd Strike - Incident';
+            currResponse = incidentResponse;
+            break;
+
+          case CrowdStrikeResponseEnum.DETECT_RESPONSE:
+            currSubject = 'Error - Crowd Strike - Detect';
+            currResponse = detectResponse;
+            break;
+        }
+
+        await emailService.sendEmail({
+          template: 'job-error',
+          subject: 'Error - Abnormal Cases',
+          nameFrom: process.env.EMAIL_SENDER_NAME,
+          from: process.env.EMAIL_SENDER_ADDRESS,
+          to: process.env.EMAIL_RECEIVER_ADDRESS,
+          emailDetail: {
+            processingDate,
+            errorCode: currResponse.reason.message,
+            errorMsg: currResponse.reason.message,
+            method: 'getCrowdStrikeData',
+          },
+        });
+      }
+    }
+
+    log.response = JSON.stringify(response);
     log.isSuccess = true;
   } catch (error) {
     const errorMsg: string = `getCrowdStrikeData - ${processingDate} - error: ${error.message}, ${error.stack}`;
