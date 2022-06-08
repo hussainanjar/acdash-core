@@ -7,6 +7,7 @@ import { createLogService, EnvReturnType, getAppEnv } from '../../utils/dal';
 import * as queryString from 'query-string';
 import { OktaOtherDetail, OktaOtherDetailModel } from '../../models/okta/okta-other-detail';
 import { EnvType } from '../../utils/enum';
+import { EmailService } from '../../utils/email';
 
 async function getOktaOtherData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
@@ -14,6 +15,9 @@ async function getOktaOtherData(): Promise<void> {
   const processingDate: Date = dayjs().toDate();
 
   jobLogger.info(`getOktaOtherData - Execute - ${processingDate}`);
+
+  // create email service instance
+  const emailService: EmailService = new EmailService();
 
   try {
     const httpCall: HttpCall = new HttpCall();
@@ -80,6 +84,20 @@ async function getOktaOtherData(): Promise<void> {
 
     log.response = errorMsg;
     log.isSuccess = false;
+
+    await emailService.sendEmail({
+      template: 'job-error',
+      subject: 'Error - Okta Other Job',
+      nameFrom: process.env.EMAIL_SENDER_NAME,
+      from: process.env.EMAIL_SENDER_ADDRESS,
+      to: process.env.EMAIL_RECEIVER_ADDRESS,
+      emailDetail: {
+        processingDate,
+        errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
+        method: 'getOktaOtherData',
+        meta: 'Okta - Auth Other Activity',
+      },
+    });
     jobLogger.error(errorMsg);
   } finally {
     jobLogger.info(`getOktaOtherData - Execute Final Block - ${processingDate}`);
@@ -113,7 +131,11 @@ async function getOutsideUsaData(url: string, httpCall: HttpCall, processingDate
 
         return resolve(totalRecords);
       })
-      .catch((error) => reject(error.message));
+      .catch((error) => {
+        const errorMsg: string = `Outside USA Data - ${error.message}`;
+        jobLogger.error(`getOutsideUsaData - ${processingDate} - ${error.message} - ${error.stack}`);
+        return reject(errorMsg);
+      });
   });
 }
 
@@ -140,7 +162,11 @@ async function getSuspiciousData(url: string, httpCall: HttpCall, processingDate
 
         return resolve(totalRecords);
       })
-      .catch((error) => reject(error.message));
+      .catch((error) => {
+        const errorMsg: string = `Suspicious Data - ${error.message}`;
+        jobLogger.error(`getSuspiciousData - ${processingDate} - ${error.message} - ${error.stack}`);
+        reject(errorMsg);
+      });
   });
 }
 
@@ -167,7 +193,11 @@ async function getLockedData(url: string, httpCall: HttpCall, processingDate: Da
 
         return resolve(totalRecords);
       })
-      .catch((error) => reject(error.message));
+      .catch((error) => {
+        const errorMsg: string = `Locked Data - ${error.message}`;
+        jobLogger.error(`getLockedData - ${processingDate} - ${error.message} - ${error.stack}`);
+        reject(errorMsg);
+      });
   });
 }
 export { getOktaOtherData };

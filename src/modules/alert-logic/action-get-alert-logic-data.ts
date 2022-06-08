@@ -96,15 +96,15 @@ async function getAlertLogicData(): Promise<void> {
 
     await emailService.sendEmail({
       template: 'job-error',
-      subject: 'Error - Alert Logic Data',
+      subject: 'Error - Alert Logic Job',
       nameFrom: process.env.EMAIL_SENDER_NAME,
       from: process.env.EMAIL_SENDER_ADDRESS,
       to: process.env.EMAIL_RECEIVER_ADDRESS,
       emailDetail: {
         processingDate,
-        errorCode: error.status || error.code,
         errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
         method: 'getAlertLogicData',
+        meta: 'Alert Logic Job',
       },
     });
   } finally {

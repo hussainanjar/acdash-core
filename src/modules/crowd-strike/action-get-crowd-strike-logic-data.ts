@@ -19,10 +19,10 @@ async function getCrowdStrikeData(): Promise<void> {
   const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
-    const token: string = await getCrowdLogicToken();
+    // const token: string = await getCrowdLogicToken();
 
     const headers: { [key: string]: string } = {
-      Authorization: `Bearer ${token}`,
+      // Authorization: `Bearer ${token}`,
     };
 
     const [systemResponse, incidentResponse, detectResponse]: any = await Promise.allSettled([
@@ -37,6 +37,8 @@ async function getCrowdStrikeData(): Promise<void> {
       detectResponse: detectResponse.status === 'rejected' ? detectResponse.reason.message : 'success',
     };
 
+    console.log(response);
+
     const payload: CrowdStrikeModel = {
       processingDate,
       protectedSystems: systemResponse?.value?.data?.meta?.pagination?.total ?? null,
@@ -46,38 +48,38 @@ async function getCrowdStrikeData(): Promise<void> {
 
     await CrowdStrike.create(payload);
 
-    for (const key of response) {
+    for (const key in response) {
       let currResponse: any = null;
-      let currSubject: string = '';
-      if (response[key] === 'rejected') {
+      let meta: string = '';
+      if (response[key] !== 'success') {
         switch (key) {
           case CrowdStrikeResponseEnum.SYSTEM_RESPONSE:
-            currSubject = 'Error - Crowd Strike - System';
+            meta = 'Crowd Strike - System';
             currResponse = systemResponse;
             break;
 
           case CrowdStrikeResponseEnum.INCIDENT_RESPONSE:
-            currSubject = 'Error - Crowd Strike - Incident';
+            meta = 'Crowd Strike - Incident';
             currResponse = incidentResponse;
             break;
 
           case CrowdStrikeResponseEnum.DETECT_RESPONSE:
-            currSubject = 'Error - Crowd Strike - Detect';
+            meta = 'Crowd Strike - Detect';
             currResponse = detectResponse;
             break;
         }
 
         await emailService.sendEmail({
           template: 'job-error',
-          subject: 'Error - Abnormal Cases',
+          subject: 'Error - Crowd Strike Job',
           nameFrom: process.env.EMAIL_SENDER_NAME,
           from: process.env.EMAIL_SENDER_ADDRESS,
           to: process.env.EMAIL_RECEIVER_ADDRESS,
           emailDetail: {
             processingDate,
-            errorCode: currResponse.reason.message,
             errorMsg: currResponse.reason.message,
             method: 'getCrowdStrikeData',
+            meta,
           },
         });
       }

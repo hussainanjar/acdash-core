@@ -63,15 +63,15 @@ async function getAbnormalCaseData(): Promise<void> {
 
     await emailService.sendEmail({
       template: 'job-error',
-      subject: 'Error - Abnormal Cases',
+      subject: 'Error - Abnormal Cases Job',
       nameFrom: process.env.EMAIL_SENDER_NAME,
       from: process.env.EMAIL_SENDER_ADDRESS,
       to: process.env.EMAIL_RECEIVER_ADDRESS,
       emailDetail: {
         processingDate,
-        errorCode: error.status || error.code,
         errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
         method: 'getAbnormalCaseData',
+        meta: 'Abnormal Cases Job',
       },
     });
   } finally {
