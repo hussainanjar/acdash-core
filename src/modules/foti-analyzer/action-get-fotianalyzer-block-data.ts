@@ -79,6 +79,7 @@ async function loadBlockFilesInDirectory(props: { pathDirectory: string; process
                 .sort((a, b) => b.mtime.getTime() - a.mtime.getTime())[0];
 
               //reading the file inside the folder
+
               if (latestFile) {
                 const newPath: string = path.join(pathDirectory, latestFile.file);
                 fs.readdirSync(newPath).forEach((file) => {
