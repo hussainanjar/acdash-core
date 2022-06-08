@@ -42,8 +42,6 @@ export default async function execute(): Promise<void> {
 
         // await Promise.allSettled([getAlertLogicData(), getCrowdStrikeData(), getKeyFactorData(), getVaronisData(), getOktaOtherData(), getTenableData(), getAbnormalData(), getAbnormalCaseData()]);
         // await Promise.allSettled([getPercentageChangeData()]);
-
-        await Promise.allSettled([getCrowdStrikeData()]);
       } catch (e) {
         const errorMsg: string = `job processing - error: ${e.message}, ${e.stack}`;
         jobLogger.error(errorMsg);
@@ -70,7 +68,7 @@ export default async function execute(): Promise<void> {
       try {
         jobLogger.debug('oktaAuthScheduler job executing...');
         await JobScheduler.update({ isProcessing: true }, { where: { id } });
-        await Promise.allSettled([getCrowdStrikeData()]);
+        await Promise.allSettled([getFotiAnalyzerData()]);
         // await Promise.allSettled([getOktaAuthData(), getFotiAnalyzerData()]);
       } catch (e) {
         const errorMsg: string = `oktaAuthScheduler job processing - error: ${e.message}, ${e.stack}`;
