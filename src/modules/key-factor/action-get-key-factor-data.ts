@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { CronLogModel } from '../../models/cron-log/cron-log';
 import { createLogService } from '../../utils/dal';
 import { KeyFactor, KeyFactorModel } from '../../models/key-factor/key-factor';
+import { EmailService } from '../../utils/email';
 
 async function getKeyFactorData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
@@ -12,6 +13,8 @@ async function getKeyFactorData(): Promise<void> {
   const processingDate: Date = dayjs().toDate();
   jobLogger.info(`getKeyFactorData - Execute - ${processingDate}`);
 
+  // create email service instance
+  const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
 
@@ -71,6 +74,20 @@ async function getKeyFactorData(): Promise<void> {
     log.response = errorMsg;
     log.isSuccess = false;
     jobLogger.error(errorMsg);
+
+    await emailService.sendEmail({
+      template: 'job-error',
+      subject: 'Error - Key Factor Job',
+      nameFrom: process.env.EMAIL_SENDER_NAME,
+      from: process.env.EMAIL_SENDER_ADDRESS,
+      to: process.env.EMAIL_RECEIVER_ADDRESS,
+      emailDetail: {
+        processingDate,
+        errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
+        method: 'getKeyFactorData',
+        meta: 'Key Factor Data',
+      },
+    });
   } finally {
     jobLogger.info(`getKeyFactorData - Execute Final Block - ${processingDate}`);
     log.serviceType = serviceType;
