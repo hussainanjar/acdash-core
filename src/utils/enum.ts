@@ -35,3 +35,12 @@ export enum CrowdStrikeResponseEnum {
   'INCIDENT_RESPONSE' = 'incidentResponse',
   'DETECT_RESPONSE' = 'detectResponse',
 }
+
+export enum VaronisFileTypeEnum {
+  userExpiredPassword = 'userExpiredPassword',
+  fileServerTotals = 'fileServerTotals',
+  userAndComputer = 'userAndComputer',
+  userAccountDisable = 'userAccountDisable',
+  disabledComputers = 'disabledComputers',
+  sharepointTotalKpi = 'sharepointTotalKpi',
+}
