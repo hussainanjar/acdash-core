@@ -10,14 +10,14 @@ export async function getCrowdLogicToken(): Promise<any> {
 
     const data: { [key: string]: string } = {
       // eslint-disable-next-line camelcase
-      grant_type: 'client_credentials',
+      grant_type: process.env.CS_GRANT_TYPE,
       // eslint-disable-next-line camelcase
-      client_id: '7aac8f2c91a545489d6c40c699a17cf0',
+      client_id: process.env.CS_CLIENT_ID,
       // eslint-disable-next-line camelcase
-      client_secret: 'gcwztFJho16HCSNr0fu5v7d3IjpRXAL9ek28nQG4',
+      client_secret: process.env.CS_CLIENT_SECRET,
     };
 
-    const response: HttpCallResponse = await httpCall.post({ url: 'https://api.us-2.crowdstrike.com/oauth2/token', headers: { 'content-type': 'application/x-www-form-urlencoded' }, data: qs.stringify(data) });
+    const response: HttpCallResponse = await httpCall.post({ url: process.env.CS_AUTH_ENDPOINT, headers: { 'content-type': 'application/x-www-form-urlencoded' }, data: qs.stringify(data) });
 
     return response.data?.access_token;
   } catch (error) {

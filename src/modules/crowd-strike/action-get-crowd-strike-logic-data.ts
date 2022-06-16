@@ -19,10 +19,10 @@ async function getCrowdStrikeData(): Promise<void> {
   const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
-    // const token: string = await getCrowdLogicToken();
+    const token: string = await getCrowdLogicToken();
 
     const headers: { [key: string]: string } = {
-      // Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
 
     const [systemResponse, incidentResponse, detectResponse]: any = await Promise.allSettled([
@@ -36,8 +36,6 @@ async function getCrowdStrikeData(): Promise<void> {
       incidentResponse: incidentResponse.status === 'rejected' ? incidentResponse.reason.message : 'success',
       detectResponse: detectResponse.status === 'rejected' ? detectResponse.reason.message : 'success',
     };
-
-    console.log(response);
 
     const payload: CrowdStrikeModel = {
       processingDate,
