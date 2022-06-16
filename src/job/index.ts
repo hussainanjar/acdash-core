@@ -68,7 +68,6 @@ export default async function execute(): Promise<void> {
       try {
         jobLogger.debug('oktaAuthScheduler job executing...');
         await JobScheduler.update({ isProcessing: true }, { where: { id } });
-
         await Promise.allSettled([getOktaAuthData(), getFotiAnalyzerData()]);
       } catch (e) {
         const errorMsg: string = `oktaAuthScheduler job processing - error: ${e.message}, ${e.stack}`;

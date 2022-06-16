@@ -29,3 +29,18 @@ export enum EnvType {
   'SWITCH_WEEKLY_TO_DAILY_TIME_SLOT' = 'SWITCH_WEEKLY_TO_DAILY_TIME_SLOT',
   'SWITCH_WEEKLY_TO_MONTHLY_TIME_SLOT' = 'SWITCH_WEEKLY_TO_MONTHLY_TIME_SLOT',
 }
+
+export enum CrowdStrikeResponseEnum {
+  'SYSTEM_RESPONSE' = 'systemResponse',
+  'INCIDENT_RESPONSE' = 'incidentResponse',
+  'DETECT_RESPONSE' = 'detectResponse',
+}
+
+export enum VaronisFileTypeEnum {
+  userExpiredPassword = 'userExpiredPassword',
+  fileServerTotals = 'fileServerTotals',
+  userAndComputer = 'userAndComputer',
+  userAccountDisable = 'userAccountDisable',
+  disabledComputers = 'disabledComputers',
+  sharepointTotalKpi = 'sharepointTotalKpi',
+}

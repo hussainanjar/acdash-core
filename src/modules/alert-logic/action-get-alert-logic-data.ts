@@ -6,12 +6,16 @@ import { AlertLogicModel, AlertLogic } from '../../models/alert-logic/alert-logi
 import { CronLogModel } from '../../models/cron-log/cron-log';
 import { createLogService, EnvReturnType, getAppEnv } from '../../utils/dal';
 import { EnvType } from '../../utils/enum';
+import { EmailService } from '../../utils/email';
 
 async function getAlertLogicData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
   const serviceType: string = 'ALERT_LOGIC';
   const processingDate: Date = dayjs().toDate();
   jobLogger.info(`getAlertLogicData - Execute - ${processingDate}`);
+
+  // create email service instance
+  const emailService: EmailService = new EmailService();
   try {
     const httpCall: HttpCall = new HttpCall();
 
@@ -89,6 +93,20 @@ async function getAlertLogicData(): Promise<void> {
     log.response = errorMsg;
 
     jobLogger.error(errorMsg);
+
+    await emailService.sendEmail({
+      template: 'job-error',
+      subject: 'Error - Alert Logic Job',
+      nameFrom: process.env.EMAIL_SENDER_NAME,
+      from: process.env.EMAIL_SENDER_ADDRESS,
+      to: process.env.EMAIL_RECEIVER_ADDRESS,
+      emailDetail: {
+        processingDate,
+        errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
+        method: 'getAlertLogicData',
+        meta: 'Alert Logic Job',
+      },
+    });
   } finally {
     jobLogger.info(`getAlertLogicData - Execute Final Block - ${processingDate}`);
 

@@ -8,6 +8,8 @@ import * as queryString from 'query-string';
 import { abnormalMessageDataModifier } from '../../utils/modifier';
 import { AbnormalThreats, AbnormalThreatsModel } from '../../models/abnormal-threats/abnormal-threats';
 import { EnvType } from '../../utils/enum';
+import { EmailService } from '../../utils/email';
+import { HttpError } from '../../types/http-error';
 
 async function getAbnormalData(): Promise<void> {
   const log: CronLogModel = {} as CronLogModel;
@@ -15,6 +17,9 @@ async function getAbnormalData(): Promise<void> {
   const processingDate: Date = dayjs().toDate();
 
   jobLogger.info(`getAbnormalData - Execute - ${processingDate}`);
+
+  // create email service instance
+  const emailService: EmailService = new EmailService();
 
   try {
     const httpCall: HttpCall = new HttpCall();
@@ -53,6 +58,20 @@ async function getAbnormalData(): Promise<void> {
     log.response = errorMsg;
     log.isSuccess = false;
     jobLogger.error(errorMsg);
+
+    await emailService.sendEmail({
+      template: 'job-error',
+      subject: 'Error - Abnormal Thread Job',
+      nameFrom: process.env.EMAIL_SENDER_NAME,
+      from: process.env.EMAIL_SENDER_ADDRESS,
+      to: process.env.EMAIL_RECEIVER_ADDRESS,
+      emailDetail: {
+        processingDate,
+        errorMsg: error?.response?.data ? JSON.stringify(error?.response?.data) : error.message,
+        method: 'getAbnormalData',
+        meta: 'Abnormal Thread and Threat Info Job',
+      },
+    });
   } finally {
     jobLogger.info(`getAbnormalData - Execute Final Block - ${processingDate}`);
     log.serviceType = serviceType;
