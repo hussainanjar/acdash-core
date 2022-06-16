@@ -75,7 +75,12 @@ async function loadMaliciousFilesInDirectory(props: { pathDirectory: string; pro
               } = fs
                 .readdirSync(pathDirectory)
                 .filter((file) => fs.lstatSync(path.join(pathDirectory, file)))
-                .map((file) => file.includes(FotiFileNameEnum.FOTI_MALICIOUS_FILE) && { file, mtime: fs.lstatSync(path.join(pathDirectory, file)).mtime })
+                .map((file) => {
+                  const currentData: string = dayjs().format('YYYY-MM-DD');
+                  const fileCreateDate: string = dayjs(fs.lstatSync(path.join(pathDirectory, file)).mtime).format('YYYY-MM-DD');
+
+                  return file.includes(FotiFileNameEnum.FOTI_MALICIOUS_FILE) && dayjs(currentData).isSame(dayjs(fileCreateDate)) && { file, mtime: fs.lstatSync(path.join(pathDirectory, file)).mtime };
+                })
                 .filter(Boolean)
                 .sort((a, b) => b.mtime.getTime() - a.mtime.getTime())[0];
               //reading the file inside the folder
